@@ -1,0 +1,192 @@
+/* === Page wrapper: leave room for fixed navbar === */
+.page-wrapper {
+  min-height: 100vh;
+  padding-top: 0px; /* match your navbar height */
+  margin: 0;
+}
+
+/* (Optional safety) If Navbar shares this file */
+.navbar {
+  position: flex;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+}
+
+/* === Card containers (single definition) === */
+.create-link-container {
+  position: flex; /* ensure not sticky/fixed */
+  background: rgba(255,255,255,.28);
+  backdrop-filter: blur(12px);
+  margin: 125px auto;            /* consistent spacing */
+  padding: 26px;
+  width: 100%;
+  max-width: 500px;
+  border-radius: 20px;
+  border: 1px solid #b3e0ff;
+  box-shadow: 0 4px 24px rgba(255, 255, 255, 0.1);
+  text-align: center;
+}
+
+/* compact spacing between stacked cards */
+.create-link-container + .create-link-container {
+  margin-top: -100px;
+}
+
+/* Result box styled to match cards */
+.link-result_box,
+.link-result-box {
+  position: static;
+  margin: 16px auto 24px;
+  padding: 16px;
+  width: 90%;
+  max-width: 480px;
+  background: rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  text-align: center;
+}
+
+/* === Titles === */
+h2, h3 {
+  font-family: 'Orbitron', sans-serif !important;
+  color: #0d7fc7;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.3);
+}
+
+/* === Inputs === */
+.input-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.input-row input,
+.input-row select {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 20px;
+  background: #dcefff;
+  color: #000;
+  font-family: 'Orbitron', sans-serif;
+}
+
+textarea {
+  width: 100%;
+  margin: 8px 0; /* slightly tighter to reduce jump when WL toggled */
+  height: 100px;
+  padding: 5px;
+  border-radius: 8px;
+  background: #dcefff;
+  color: #1e34c1;
+  font-family: 'Orbitron', sans-serif;
+}
+
+label {
+  color: #007bff;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+  display: block;
+}
+
+/* === Buttons === */
+button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+button:hover {
+  background: #005bcc;
+}
+
+/* Short URL chip */
+.short-url {
+  background: #e2f0ff;
+  color: #000;
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 12px;
+  font-size: 0.95rem;
+  overflow-wrap: break-word;
+}
+
+/* QR area */
+.qr-wrapper {
+  margin: 20px 0;
+}
+
+/* === QR Modal === */
+.qr-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.qr-modal-content {
+  background: #111;
+  border: 1px solid #b3e0ff;
+  padding: 30px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 0 20px rgba(180, 230, 255, 0.3);
+}
+
+.qr-modal-content canvas {
+  margin-bottom: 20px;
+}
+
+.enlarge-button {
+  margin-top: 12px;
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid #80cfff;
+  color: #80cfff;
+  font-family: 'Orbitron', sans-serif;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.enlarge-button:hover {
+  background: #80cfff;
+  color: #001b33;
+}
+
+/* === REMOVE any duplicates below this line in your old file === */
+/* (Specifically: the second .create-link-container and .link-result-box
+   block that had margin-top: 130px or negative margins.) */
+.create-link-container {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  margin: 125px auto;
+  padding: 26px;
+  width: 100%;
+  max-width: 500px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 24px rgba(255, 255, 255, 0.1);
+  text-align: center;
+}
+
+

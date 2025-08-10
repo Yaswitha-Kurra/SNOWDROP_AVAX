@@ -1,0 +1,61 @@
+.claim-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: linear-gradient(rgba(13, 127, 199, 0.1), rgba(13, 127, 199, 0.1)), url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"%3E%3Cpath fill="%230d7fc7" fill-opacity="0.1" d="M0,128L48,138.7C96,149,192,171,288,181.3C384,192,480,192,576,186.7C672,181,768,171,864,170.7C960,171,1056,181,1152,176C1248,171,1344,149,1392,138.7L1440,128V320H1392C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320H0Z"%3E%3C/path%3E%3C/svg%3E');
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.claim-box {
+  background: linear-gradient(to right, rgba(26, 26, 26, 0.8), rgba(13, 13, 13, 0.8)); /* Adjusted to translucent Snowdrop style */
+  border: 2px solid #b3e0ff; /* Snowdrop border color */
+  box-shadow: 0 0 15px #b3e0ff; /* Snowdrop shadow color */
+  padding: 24px 20px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 360px;
+  margin-top: 150px; /* Reduced margin to minimize gap below navbar */
+  text-align: center;
+  font-family: 'Orbitron', sans-serif;
+}
+
+.claim-title {
+  font-size: 22px;
+  margin-bottom: 16px;
+  color: #b3e0ff; /* Snowdrop title color */
+}
+
+.claim-status,
+.claim-error,
+.claim-success {
+  color: #d1e8ff; /* Lighter text color for status/error */
+  margin-bottom: 16px;
+  font-size: 15px;
+}
+
+.claim-button {
+  padding: 10px 20px;
+  font-size: 15px;
+  background-color: #0d7fc7; /* Snowdrop button color */
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'Orbitron', sans-serif;
+  transition: transform 0.2s ease;
+}
+
+.claim-button:hover {
+  transform: scale(1.05);
+}
+
+.claim-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.claim-success {
+  color: #dbe1de; /* Softer green for success, fitting Snowdrop theme */
+  margin-bottom: 16px;
+  font-size: 15px;
+}

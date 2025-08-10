@@ -1,0 +1,82 @@
+.jar-container {
+  max-width: 5px;
+  margin: 80px auto;
+  padding: 24px;
+  background: #ede8e8;
+  border: 1px solid #187fdf;
+  border-radius: 12px;
+  text-align: center;
+  color: #eee;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.wallet, .jar-balance {
+  font-size: 1.1rem;
+  margin-bottom: 12px;
+}
+
+.jar-btn {
+  background: #2171d3d2;
+  border: none;
+  padding: 12px 24px;
+  font-size: 1rem;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.jar-btn:disabled {
+  background: #888888;
+  cursor: not-allowed;
+}
+.jar-container {
+  padding: 30px;
+  max-width: 600px;
+  margin: auto;
+  color: rgba(0, 4, 9, 0.844);
+  background-color: #f5f7fa8b;;
+  border-radius: 12px;
+  margin-top: 215px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.3);
+}
+
+.jar-action {
+  margin: 20px 0;
+  display: flex;
+  gap: 10px;
+  flex-direction: column;
+}
+
+.jar-action input {
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+}
+
+.jar-action button {
+  background-color: #3081dece;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+
+.jar-action button:hover {
+  background-color: #358ce2d8;
+}
+
+.toast-notification {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #222;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 15px;
+  z-index: 9999;
+}

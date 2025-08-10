@@ -1,0 +1,103 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.mydrops-wrapper {
+  background: linear-gradient(rgba(13, 127, 199, 0.1), rgba(13, 127, 199, 0.1)), url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"%3E%3Cpath fill="%230d7fc7" fill-opacity="0.1" d="M0,128L48,138.7C96,149,192,171,288,181.3C384,192,480,192,576,186.7C672,181,768,171,864,170.7C960,171,1056,181,1152,176C1248,171,1344,149,1392,138.7L1440,128V320H1392C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320H0Z"%3E%3C/path%3E%3C/svg%3E');
+  min-height: 100vh;
+  color: #e6f0fa; /* Lighter text color for better contrast */
+  font-family: 'Orbitron', sans-serif;
+}
+
+.mydrops-container {
+  max-width: 1200px;
+  margin: 80px auto 0;
+  padding: 20px;
+}
+
+.mydrops-title {
+  font-size: 38px;
+  color: #1976d2; /* Softer blue for title, still thematic */
+  margin-bottom: 20px;
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.4);
+  text-align: center;       /* ✅ Center the text */
+  width: 100%;              /* Ensure full width for centering */
+}
+
+.mydrops-status,
+.mydrops-error {
+  font-size: 24px;
+  margin-top: 20px;
+  color: #d1e8ff; /* Lighter shade for status/error text */
+}
+
+.drops-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 18px;
+}
+
+.drop-card {
+  background: rgba(255, 255, 255, 0.28); /* frosted white glass */
+  backdrop-filter: blur(12px);
+  border: 2px solid #0b4f75; /* same deep blue as Analytics */
+  padding: 18px;
+  border-radius: 14px; /* match Analytics radius */
+  box-shadow: 0 8px 24px rgba(179, 224, 255, 0.35); /* soft glow */
+  font-size: 14px;
+  color: #0b4f75; /* same text tone as Analytics */
+  word-break: break-word;
+  transition: box-shadow 0.3s ease;
+}
+
+.drop-card:hover {
+  box-shadow: 0 0 15px rgba(179, 224, 255, 0.5);
+}
+
+
+.copy-btn {
+  margin-top: 10px;
+  background-color: #0d7fc7; /* Thematic blue for buttons */
+  color: #ffffff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 13px;
+  transition: background 0.3s ease;
+}
+
+.copy-btn:hover {
+  background-color: #0b639d; /* Darker blue on hover */
+}
+
+.mydrops-status {
+  font-weight: bold;
+  text-align: center;
+  margin-top: 100px;
+}
+
+.mydrops-error {
+  font-weight: bold;
+  color: #ff6b6b; /* Softer red for errors, still visible */
+  text-align: center;
+  margin-top: 100px;
+}
+
+.copy-link-btn {
+  margin-top: 4px;
+  padding: 6px 12px;
+  font-size: 14px;
+  background-color: #0d7fc7;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.copy-link-btn:hover {
+  background-color: #0b639d;
+}

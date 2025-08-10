@@ -1,0 +1,161 @@
+/* SnowDrop Theme: Navbar.css */
+:root {
+  --bg: #f5f7fa;
+  --primary: #1976d2;
+  --accent: #e53935;
+  --text: #1c1c1e;
+  --card: rgba(255, 255, 255, 0.95);
+}
+
+.navbar-wrapper {
+  width: 100vw;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  border-bottom: 2px solid var(--primary);
+}
+
+.navbar {
+  width: 100%;
+  padding: 15px 5vw;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-sizing: border-box;
+  min-height: 50px;
+}
+
+.navbar-left,
+.navbar-center,
+.navbar-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.navbar-left {
+  justify-content: flex-start;
+}
+
+.navbar-center {
+  justify-content: center;
+  gap: 30px; /* Reduced gap for tighter spacing */
+  flex-wrap: nowrap; /* Prevent wrapping to new line */
+  min-width: 300px; /* Ensure minimum width to hold multiple links */
+}
+
+.navbar-right {
+  justify-content: flex-end;
+}
+
+.nav-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.nav-link {
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--primary);
+  text-decoration: none;
+  padding: 8px 12px; /* Reduced padding to save space */
+  margin: 0 5px; /* Reduced margin for tighter layout */
+  border: 2px solid var(--primary);
+  border-radius: 10px;
+  transition: 0.2s ease;
+  background: white;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 0 8px rgba(25, 118, 210, 0.1);
+  white-space: nowrap; /* Prevent text wrapping within links */
+}
+
+.nav-link:hover {
+  background-color: var(--primary);
+  color: white;
+}
+
+.wallet-btn {
+  background: var(--accent);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-weight: 600;
+  border: none;
+  box-shadow: 0 0 10px rgba(229, 57, 53, 0.3);
+  cursor: pointer;
+}
+
+.wallet-btn:hover {
+  background: #c62828;
+}
+
+.wallet-display {
+  font-size: 14px;
+  color: var(--text);
+  background: white;
+  padding: 6px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--accent);
+  box-shadow: 0 0 5px rgba(229, 57, 53, 0.1);
+}
+
+.solo-analytics {
+  margin: 0 auto;
+  font-weight: bold;
+}
+
+/* Media query for smaller screens */
+@media (max-width: 600px) {
+  .navbar-center {
+    flex-direction: row; /* Ensure horizontal layout */
+    overflow-x: auto; /* Allow horizontal scrolling if needed */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on mobile */
+  }
+
+  .nav-link {
+    flex-shrink: 0; /* Prevent shrinking of links */
+  }
+}
+.navbar {
+  position: fixed;
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 20px;
+  padding: 16px 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  z-index: 1000;
+  border: 1px solid var(--primary); /* ✅ Thin blue outline */
+  max-width: 95vw;                  /* ✅ Prevents it from touching edges */
+  margin: 0 auto;                   /* ✅ Centers it on the screen */
+}
+
+
+
+.nav-link,
+.wallet-btn {
+  background: white;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-weight: bold;
+  color: var(--primary);
+  border: 2px solid var(--primary);
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.nav-link:hover,
+.wallet-btn:hover {
+  background: var(--primary);
+  color: white;
+}
