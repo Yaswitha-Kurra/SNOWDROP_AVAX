@@ -22,9 +22,12 @@ export default function Jar() {
   const [provider, setProvider] = useState(null)
   const [amount, setAmount] = useState('')
 
-  // keep latest wallet in a ref for block listener closures
+  // refs to avoid stale closures + duplicate listeners
   const walletRef = useRef('')
-  const visibleRef = useRef(true)
+  const listenersAttachedRef = useRef(false)
+  const blockHandlerRef = useRef(null)
+
+  useEffect(() => { walletRef.current = wallet }, [wallet])
 
   const getContract = useCallback(async () => {
     if (!provider) return null
@@ -53,31 +56,23 @@ export default function Jar() {
         return false
       }
       return true
-    } catch {
-      return false
-    }
+    } catch { return false }
   }, [provider])
 
+  // bootstrap provider + initial read
   useEffect(() => {
-    walletRef.current = wallet
-  }, [wallet])
+    if (!window.ethereum) {
+      showToast('🦊 Wallet not found')
+      return
+    }
 
-  // init + listeners
-  useEffect(() => {
-    let blockHandler = null
-    const init = async () => {
-      if (!window.ethereum) {
-        showToast('🦊 Wallet not found')
-        return
-      }
+    const prov = new ethers.providers.Web3Provider(window.ethereum)
+    setProvider(prov)
 
-      // Request account permission for this origin (important on Vercel)
+    // request accounts for this origin (Vercel)
+    (async () => {
       try { await window.ethereum.request({ method: 'eth_requestAccounts' }) } catch {}
 
-      const prov = new ethers.providers.Web3Provider(window.ethereum)
-      setProvider(prov)
-
-      // pick active address (prefer provider)
       let addr = ''
       try { addr = await prov.getSigner().getAddress() } catch {}
       if (!addr) {
@@ -85,56 +80,57 @@ export default function Jar() {
         addr = saved
       }
       setWallet(addr)
-
       await ensureFuji()
       await readJarBalance(addr)
+    })()
 
-      // Update on account change
-      const onAccountsChanged = async (accounts) => {
-        const next = accounts?.[0] || ''
-        setWallet(next)
-        await readJarBalance(next)
-      }
-      window.ethereum.on?.('accountsChanged', onAccountsChanged)
-
-      // Hard refresh on chain change to avoid mixed providers
-      const onChainChanged = () => window.location.reload()
-      window.ethereum.on?.('chainChanged', onChainChanged)
-
-      // Live sync: on every new block (when tab visible), re-read jar balance
-      blockHandler = async () => {
-        if (!visibleRef.current) return
-        const ok = await ensureFuji()
-        if (!ok) return
-        const current = walletRef.current
-        if (current) await readJarBalance(current)
-      }
-      prov.on('block', blockHandler)
-
-      // Pause/resume on tab visibility change
-      const onVisibility = async () => {
-        visibleRef.current = document.visibilityState === 'visible'
-        if (visibleRef.current) {
-          const current = walletRef.current
-          await readJarBalance(current)
-        }
-      }
-      document.addEventListener('visibilitychange', onVisibility)
-
-      // Cleanup
-      return () => {
-        window.ethereum?.removeListener?.('accountsChanged', onAccountsChanged)
-        window.ethereum?.removeListener?.('chainChanged', onChainChanged)
-        document.removeEventListener('visibilitychange', onVisibility)
-        if (blockHandler) prov.removeListener('block', blockHandler)
-      }
+    return () => {
+      // cleanup happens in the listener effect below
     }
-
-    const cleanupPromise = init()
-    return () => { /* cleanup handled inside init's return */ }
   }, [ensureFuji, readJarBalance])
 
+  // attach listeners ONCE, with proper cleanup
+  useEffect(() => {
+    if (!provider || listenersAttachedRef.current) return
+    listenersAttachedRef.current = true
+
+    const onAccountsChanged = async (accounts) => {
+      const next = accounts?.[0] || ''
+      setWallet(next)
+      await readJarBalance(next)
+    }
+
+    const onChainChanged = () => {
+      // Full reload to reset provider state across wallets (MetaMask/Pelagus)
+      window.location.reload()
+    }
+
+    window.ethereum?.on?.('accountsChanged', onAccountsChanged)
+    window.ethereum?.on?.('chainChanged', onChainChanged)
+
+    // live sync on each new block (lightweight re-read)
+    const bh = async () => {
+      const ok = await ensureFuji()
+      if (!ok) return
+      const addr = walletRef.current
+      if (addr) await readJarBalance(addr)
+    }
+    blockHandlerRef.current = bh
+    provider.on('block', bh)
+
+    return () => {
+      // 🔥 cleanup to prevent MaxListenersExceededWarning
+      try { window.ethereum?.removeListener?.('accountsChanged', onAccountsChanged) } catch {}
+      try { window.ethereum?.removeListener?.('chainChanged', onChainChanged) } catch {}
+      try { if (blockHandlerRef.current) provider.removeListener('block', blockHandlerRef.current) } catch {}
+      listenersAttachedRef.current = false
+      blockHandlerRef.current = null
+    }
+  }, [provider, ensureFuji, readJarBalance])
+
   const refresh = async () => {
+    // optional: re-request accounts to ensure active account on this origin
+    try { await window.ethereum?.request?.({ method: 'eth_requestAccounts' }) } catch {}
     await readJarBalance(walletRef.current)
     showToast('🔄 Refreshed')
   }
@@ -157,20 +153,22 @@ export default function Jar() {
       const signer = provider.getSigner()
       const signerAddress = await signer.getAddress()
       const contract = new ethers.Contract(JAR_ADDRESS, jarArtifact.abi, signer)
-
       const tx = await contract.deposit({ value: ethers.utils.parseEther(amount) })
       await tx.wait()
 
-      // read immediately + retry a bit for RPC lag
+      // read now + small retry for RPC lag
+      let done = false
       for (let i = 0; i < 5; i++) {
         try {
           const updated = await contract.jarBalances(signerAddress)
           setBalance(ethers.utils.formatEther(updated))
           setWallet(signerAddress)
+          done = true
           break
         } catch {}
         await new Promise(r => setTimeout(r, 700))
       }
+      if (!done) await refresh()
 
       showToast('✅ Deposit successful!')
       setAmount('')
