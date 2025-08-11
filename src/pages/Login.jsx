@@ -84,7 +84,8 @@ const handleLogin = async (session) => {
   "ljopfldonknfflhlgihlaimfmpgffjej",
   "ccnmpinpfedmemgmjpfihfccplmpbplo",
   "lifmiaadfbedeijdobpakjpdilkloneo",
-  "ljdfigfecfimanppcjeinlcdgglgkigp"
+  "ljdfigfecfimanppcjeinlcdgglgkigp",
+  "iggmhalgfaeihoogkpikojgikolemoej"
 ]
 
 if (connectedWallet && handle && typeof chrome !== "undefined" && chrome.runtime?.sendMessage) {
