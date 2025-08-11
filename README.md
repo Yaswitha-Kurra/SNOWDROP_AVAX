@@ -1,12 +1,41 @@
-# React + Vite
+# ❄️ SNOWDROP AVAX
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+SnowDrop AVAX is a Web3-powered tipping platform that lets you **tip AVAX or USDC directly on Twitter posts** without leaving the platform.  
+It also includes **Jar Tipping**, allowing you to deposit funds in a personal on-chain "jar" and send gasless tips using a backend relayer.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 📥 Download & Install the Extension
 
-## Expanding the ESLint configuration
+We are still awaiting approval on the Chrome Web Store.  
+For now, you can manually download and load the extension from GitHub.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Steps:
+1. **Download Extension**
+   - Get the extension from here: [SnowDrop Extension Repository](https://github.com/Yaswitha-Kurra/SnowDrop)
+   
+2. **Get Your Extension ID**
+   - After loading the extension (see below), note down your **Extension ID** — it will be needed for configuration.
+
+3. **Load the Extension in Developer Mode**
+   - Open **Chrome** → go to `chrome://extensions/`
+   - Enable **Developer mode** (toggle in the top right).
+   - Click **Load unpacked** → select the downloaded extension folder.
+   - Pin the extension in your toolbar for quick access.
+
+4. **Start Tipping**
+   - Open Twitter, click the tip icon under a tweet, and send tips instantly.
+
+---
+
+## 💰 Jar Tipping (Backend Setup)
+
+Jar Tipping lets you send gasless tips from your pre-funded jar.
+
+### Steps:
+1. **Download Backend**
+   - Get the backend zip from the repository.
+   
+2. **Run the Backend**
+   ```bash
+   node index.cjs
