@@ -181,9 +181,6 @@ export default function Jar() {
           <button className="jar-btn" onClick={deposit} disabled={loading}>
             {loading ? 'Depositing...' : '➕ Deposit to Jar'}
           </button>
-          <button className="jar-btn ghost" onClick={refresh} disabled={loading}>
-            Refresh
-          </button>
         </div>
       </div>
     </div>
