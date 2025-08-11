@@ -80,3 +80,23 @@
   font-size: 15px;
   z-index: 9999;
 }
+/* subtle enter/exit for the toast */
+.toast-notification {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  font-weight: 600;
+  letter-spacing: .2px;
+}
+.jar-action input {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  background-color: transparent; /* transparent background */
+  color: #111; /* dark text */
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+.jar-action input::placeholder {
+  color: rgba(0, 0, 0, 0.6); /* darker placeholder for visibility */
+}
