@@ -6,6 +6,7 @@ import './Jar.css'
 
 const JAR_ADDRESS = '0x0C8a7eF6494eF7fA11e506dDe27B16b029c9Faa1'
 const FUJI_CHAIN_ID = 43113
+const POLL_MS = 4000
 
 function showToast(msg) {
   const el = document.createElement('div')
@@ -26,35 +27,19 @@ export default function Jar() {
   const walletRef = useRef('')
   useEffect(() => { walletRef.current = wallet }, [wallet])
 
-  // Provider bootstrap (ethers v6)
-  useEffect(() => {
-    if (!window.ethereum) {
-      showToast('🦊 Wallet not found')
-      return
-    }
-    const prov = new ethers.BrowserProvider(window.ethereum) // v6
-    setProvider(prov)
-
-    ;(async () => {
-      try { await window.ethereum.request?.({ method: 'eth_requestAccounts' }) } catch {}
-      let addr = ''
-      try {
-        const signer = await prov.getSigner()
-        addr = await signer.getAddress()
-      } catch {}
-      if (!addr) addr = localStorage.getItem('walletAddress') || ''
-      setWallet(addr)
-      await ensureFuji(prov)
-      await readJarBalance(prov, addr)
-    })()
-
-    return () => {
-      if (pollIdRef.current) {
-        clearInterval(pollIdRef.current)
-        pollIdRef.current = null
-      }
-    }
+  // ----- helpers (ethers v5) -----
+  const getProvider = useCallback(() => {
+    if (!window.ethereum) return null
+    return new ethers.providers.Web3Provider(window.ethereum)
   }, [])
+
+  const getSigner = useCallback((prov) => prov.getSigner(), [])
+
+  const getContract = useCallback(async (prov) => {
+    if (!prov) return null
+    const signer = getSigner(prov)
+    return new ethers.Contract(JAR_ADDRESS, jarArtifact.abi, signer)
+  }, [getSigner])
 
   const ensureFuji = useCallback(async (prov) => {
     if (!prov) return false
@@ -65,15 +50,7 @@ export default function Jar() {
         return false
       }
       return true
-    } catch {
-      return false
-    }
-  }, [])
-
-  const getContract = useCallback(async (prov) => {
-    if (!prov) return null
-    const signer = await prov.getSigner()
-    return new ethers.Contract(JAR_ADDRESS, jarArtifact.abi, signer)
+    } catch { return false }
   }, [])
 
   const readJarBalance = useCallback(async (prov, addr) => {
@@ -82,26 +59,59 @@ export default function Jar() {
       const c = await getContract(prov)
       if (!c) return
       const bal = await c.jarBalances(addr)
-      setBalance(ethers.formatEther(bal)) // v6
+      setBalance(ethers.utils.formatEther(bal))
     } catch {
       setBalance('0')
     }
   }, [getContract])
 
-  // Lightweight polling (every 4s) instead of provider.on('block')
+  // ----- bootstrap -----
+  useEffect(() => {
+    const prov = getProvider()
+    if (!prov) {
+      showToast('🦊 Wallet not found')
+      return
+    }
+    setProvider(prov)
+
+    (async () => {
+      try { await window.ethereum.request?.({ method: 'eth_requestAccounts' }) } catch {}
+      let addr = ''
+      try { addr = await prov.getSigner().getAddress() } catch {}
+      if (!addr) addr = localStorage.getItem('walletAddress') || ''
+      setWallet(addr)
+      await ensureFuji(prov)
+      await readJarBalance(prov, addr)
+    })()
+  }, [getProvider, ensureFuji, readJarBalance])
+
+  // ----- listeners + polling (no provider.on('block')) -----
   useEffect(() => {
     if (!provider) return
-    if (pollIdRef.current) return
+
+    const onAccountsChanged = async (accounts) => {
+      const next = accounts?.[0] || ''
+      setWallet(next)
+      await readJarBalance(provider, next)
+    }
+    const onChainChanged = () => window.location.reload()
+
+    window.ethereum?.on?.('accountsChanged', onAccountsChanged)
+    window.ethereum?.on?.('chainChanged', onChainChanged)
+
+    // lightweight polling so tips from elsewhere show up
     const tick = async () => {
       const ok = await ensureFuji(provider)
       if (!ok) return
       const addr = walletRef.current
       if (addr) await readJarBalance(provider, addr)
     }
-    pollIdRef.current = window.setInterval(tick, 4000)
-    // prime once
-    tick()
+    pollIdRef.current = window.setInterval(tick, POLL_MS)
+    tick() // prime once
+
     return () => {
+      try { window.ethereum?.removeListener?.('accountsChanged', onAccountsChanged) } catch {}
+      try { window.ethereum?.removeListener?.('chainChanged', onChainChanged) } catch {}
       if (pollIdRef.current) {
         clearInterval(pollIdRef.current)
         pollIdRef.current = null
@@ -109,6 +119,7 @@ export default function Jar() {
     }
   }, [provider, ensureFuji, readJarBalance])
 
+  // ----- actions -----
   const refresh = async () => {
     try { await window.ethereum?.request?.({ method: 'eth_requestAccounts' }) } catch {}
     await readJarBalance(provider, walletRef.current)
@@ -124,19 +135,19 @@ export default function Jar() {
       const ok = await ensureFuji(provider)
       if (!ok) { setLoading(false); return }
 
-      const signer = await provider.getSigner()
+      const signer = getSigner(provider)
       const signerAddress = await signer.getAddress()
       const contract = await getContract(provider)
 
-      const tx = await contract.deposit({ value: ethers.parseEther(amount) }) // v6
+      const tx = await contract.deposit({ value: ethers.utils.parseEther(amount) })
       await tx.wait()
 
-      // read now + small retry for RPC lag
+      // immediate read + small retry for RPC lag
       let done = false
       for (let i = 0; i < 5; i++) {
         try {
           const updated = await contract.jarBalances(signerAddress)
-          setBalance(ethers.formatEther(updated))
+          setBalance(ethers.utils.formatEther(updated))
           setWallet(signerAddress)
           done = true
           break
