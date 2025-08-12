@@ -8,11 +8,11 @@ const JAR_ADDRESS = '0x0C8a7eF6494eF7fA11e506dDe27B16b029c9Faa1'
 const FUJI_CHAIN_ID = 43113
 
 function showToast(msg) {
-  const toast = document.createElement('div')
-  toast.className = 'toast-notification'
-  toast.innerText = msg
-  document.body.appendChild(toast)
-  setTimeout(() => toast.remove(), 2000)
+  const el = document.createElement('div')
+  el.className = 'toast-notification'
+  el.innerText = msg
+  document.body.appendChild(el)
+  setTimeout(() => el.remove(), 2000)
 }
 
 export default function Jar() {
@@ -22,138 +22,113 @@ export default function Jar() {
   const [provider, setProvider] = useState(null)
   const [amount, setAmount] = useState('')
 
-  // refs to avoid stale closures + duplicate listeners
+  const pollIdRef = useRef(null)
   const walletRef = useRef('')
-  const listenersAttachedRef = useRef(false)
-  const blockHandlerRef = useRef(null)
-
   useEffect(() => { walletRef.current = wallet }, [wallet])
 
-  const getContract = useCallback(async () => {
-    if (!provider) return null
-    const signer = provider.getSigner()
-    return new ethers.Contract(JAR_ADDRESS, jarArtifact.abi, signer)
-  }, [provider])
-
-  const readJarBalance = useCallback(async (addr) => {
-    if (!addr) { setBalance('0'); return }
-    try {
-      const contract = await getContract()
-      if (!contract) return
-      const bal = await contract.jarBalances(addr)
-      setBalance(ethers.utils.formatEther(bal))
-    } catch {
-      setBalance('0')
-    }
-  }, [getContract])
-
-  const ensureFuji = useCallback(async () => {
-    if (!provider) return false
-    try {
-      const net = await provider.getNetwork()
-      if (Number(net.chainId) !== FUJI_CHAIN_ID) {
-        showToast('⚠️ Switch to Avalanche Fuji')
-        return false
-      }
-      return true
-    } catch { return false }
-  }, [provider])
-
-  // bootstrap provider + initial read
+  // Provider bootstrap (ethers v6)
   useEffect(() => {
     if (!window.ethereum) {
       showToast('🦊 Wallet not found')
       return
     }
-
-    const prov = new ethers.providers.Web3Provider(window.ethereum)
+    const prov = new ethers.BrowserProvider(window.ethereum) // v6
     setProvider(prov)
 
-    // request accounts for this origin (Vercel)
-    (async () => {
-      try { await window.ethereum.request({ method: 'eth_requestAccounts' }) } catch {}
-
+    ;(async () => {
+      try { await window.ethereum.request?.({ method: 'eth_requestAccounts' }) } catch {}
       let addr = ''
-      try { addr = await prov.getSigner().getAddress() } catch {}
-      if (!addr) {
-        const saved = localStorage.getItem('walletAddress') || ''
-        addr = saved
-      }
+      try {
+        const signer = await prov.getSigner()
+        addr = await signer.getAddress()
+      } catch {}
+      if (!addr) addr = localStorage.getItem('walletAddress') || ''
       setWallet(addr)
-      await ensureFuji()
-      await readJarBalance(addr)
+      await ensureFuji(prov)
+      await readJarBalance(prov, addr)
     })()
 
     return () => {
-      // cleanup happens in the listener effect below
+      if (pollIdRef.current) {
+        clearInterval(pollIdRef.current)
+        pollIdRef.current = null
+      }
     }
-  }, [ensureFuji, readJarBalance])
+  }, [])
 
-  // attach listeners ONCE, with proper cleanup
+  const ensureFuji = useCallback(async (prov) => {
+    if (!prov) return false
+    try {
+      const net = await prov.getNetwork()
+      if (Number(net.chainId) !== FUJI_CHAIN_ID) {
+        showToast('⚠️ Switch to Avalanche Fuji')
+        return false
+      }
+      return true
+    } catch {
+      return false
+    }
+  }, [])
+
+  const getContract = useCallback(async (prov) => {
+    if (!prov) return null
+    const signer = await prov.getSigner()
+    return new ethers.Contract(JAR_ADDRESS, jarArtifact.abi, signer)
+  }, [])
+
+  const readJarBalance = useCallback(async (prov, addr) => {
+    if (!prov || !addr) { setBalance('0'); return }
+    try {
+      const c = await getContract(prov)
+      if (!c) return
+      const bal = await c.jarBalances(addr)
+      setBalance(ethers.formatEther(bal)) // v6
+    } catch {
+      setBalance('0')
+    }
+  }, [getContract])
+
+  // Lightweight polling (every 4s) instead of provider.on('block')
   useEffect(() => {
-    if (!provider || listenersAttachedRef.current) return
-    listenersAttachedRef.current = true
-
-    const onAccountsChanged = async (accounts) => {
-      const next = accounts?.[0] || ''
-      setWallet(next)
-      await readJarBalance(next)
-    }
-
-    const onChainChanged = () => {
-      // Full reload to reset provider state across wallets (MetaMask/Pelagus)
-      window.location.reload()
-    }
-
-    window.ethereum?.on?.('accountsChanged', onAccountsChanged)
-    window.ethereum?.on?.('chainChanged', onChainChanged)
-
-    // live sync on each new block (lightweight re-read)
-    const bh = async () => {
-      const ok = await ensureFuji()
+    if (!provider) return
+    if (pollIdRef.current) return
+    const tick = async () => {
+      const ok = await ensureFuji(provider)
       if (!ok) return
       const addr = walletRef.current
-      if (addr) await readJarBalance(addr)
+      if (addr) await readJarBalance(provider, addr)
     }
-    blockHandlerRef.current = bh
-    provider.on('block', bh)
-
+    pollIdRef.current = window.setInterval(tick, 4000)
+    // prime once
+    tick()
     return () => {
-      // 🔥 cleanup to prevent MaxListenersExceededWarning
-      try { window.ethereum?.removeListener?.('accountsChanged', onAccountsChanged) } catch {}
-      try { window.ethereum?.removeListener?.('chainChanged', onChainChanged) } catch {}
-      try { if (blockHandlerRef.current) provider.removeListener('block', blockHandlerRef.current) } catch {}
-      listenersAttachedRef.current = false
-      blockHandlerRef.current = null
+      if (pollIdRef.current) {
+        clearInterval(pollIdRef.current)
+        pollIdRef.current = null
+      }
     }
   }, [provider, ensureFuji, readJarBalance])
 
   const refresh = async () => {
-    // optional: re-request accounts to ensure active account on this origin
     try { await window.ethereum?.request?.({ method: 'eth_requestAccounts' }) } catch {}
-    await readJarBalance(walletRef.current)
+    await readJarBalance(provider, walletRef.current)
     showToast('🔄 Refreshed')
   }
 
   const deposit = async () => {
-    if (!provider) {
-      showToast('🦊 Connect your wallet first')
-      return
-    }
-    if (!amount || isNaN(amount) || Number(amount) <= 0) {
-      showToast('❌ Enter a valid amount')
-      return
-    }
+    if (!provider) return showToast('🦊 Connect your wallet first')
+    if (!amount || isNaN(amount) || Number(amount) <= 0) return showToast('❌ Enter a valid amount')
 
     setLoading(true)
     try {
-      const ok = await ensureFuji()
+      const ok = await ensureFuji(provider)
       if (!ok) { setLoading(false); return }
 
-      const signer = provider.getSigner()
+      const signer = await provider.getSigner()
       const signerAddress = await signer.getAddress()
-      const contract = new ethers.Contract(JAR_ADDRESS, jarArtifact.abi, signer)
-      const tx = await contract.deposit({ value: ethers.utils.parseEther(amount) })
+      const contract = await getContract(provider)
+
+      const tx = await contract.deposit({ value: ethers.parseEther(amount) }) // v6
       await tx.wait()
 
       // read now + small retry for RPC lag
@@ -161,7 +136,7 @@ export default function Jar() {
       for (let i = 0; i < 5; i++) {
         try {
           const updated = await contract.jarBalances(signerAddress)
-          setBalance(ethers.utils.formatEther(updated))
+          setBalance(ethers.formatEther(updated))
           setWallet(signerAddress)
           done = true
           break
