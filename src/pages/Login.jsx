@@ -80,12 +80,7 @@ const handleLogin = async (session) => {
   }
 
   const EXTENSION_IDS = [
-  "dppbieefbdloflnmjpdiekbnjfcjijei", // Your main extension
-  "ljopfldonknfflhlgihlaimfmpgffjej",
-  "ccnmpinpfedmemgmjpfihfccplmpbplo",
-  "lifmiaadfbedeijdobpakjpdilkloneo",
-  "ljdfigfecfimanppcjeinlcdgglgkigp",
-  "iggmhalgfaeihoogkpikojgikolemoej"
+  "bpjdobicgckpcjoeahjioggopedpoioc"
 ]
 
 if (connectedWallet && handle && typeof chrome !== "undefined" && chrome.runtime?.sendMessage) {
